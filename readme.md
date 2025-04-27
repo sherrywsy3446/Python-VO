@@ -1,91 +1,113 @@
-## Python-VO
-A simple python implemented frame by frame visual odometry. This project is inspired and based on [superpoint-vo](https://github.com/syinari0123/SuperPoint-VO) and [monoVO-python](https://github.com/uoip/monoVO-python).
+# Task 1: Python Programming for Visual Odometry
 
-We tested handcraft features ORB and SIFT, deep learning based feature [SuperPoint](https://github.com/magicleap/SuperPointPretrainedNetwork), more feature detectors are also possible to be added to this project.
-For feature matchers, we tested the KNN and FLANN mathers implemented in OpenCV, and the novel deep learning based mather [SuperGlue](https://github.com/magicleap/SuperGluePretrainedNetwork).
+## Overview
 
-**Feature detectors**
-- ORB (OpenCV implementation)
-- SIFT (OpenCV implementation)
-- [SuperPoint](https://github.com/magicleap/SuperPointPretrainedNetwork) 
+This project implements and evaluates Visual Odometry (VO) algorithms using Python in Jupyter notebooks. The project consists of two main components:
 
-**Feature matchers**
-- KNN, FLANN (OpenCV implementation)
-- [SuperGlue](https://github.com/magicleap/SuperGluePretrainedNetwork)
+1. **Robustness Evaluation of Visual Odometry** - Testing VO performance under various image noise conditions
+2. **Visual Odometry on PuzzleBot** - Implementation of VO on videos captured using a PuzzleBot robot
 
-**SIFT Keypoints**
+## Project Structure
 
-![sift_keypoints](screenshots/sift_keypoints.png)
-
-**SuperPoint Keypoints**
-
-![superpoint_keypoints](screenshots/superpoint_keypoints.png)
-
-**SIFT+FLANN Matches**
-
-![sift_flann_match](screenshots/sift_flann_match.png)
-
-**SuperPoint+FLANN Matches**
-
-![superpoint_flann_match](screenshots/superpoint_flann_match.png)
-
-**SuperPoint+SuperGlue Matches**
-
-![superpoint_superglue_match](screenshots/superpoint_superglue_match.png)
-
-## Install
-
-- Get this repository
-    ```bash
-    git clone https://github.com/Shiaoming/Python-VO.git
-    cd Python-VO
-    ``` 
-  
-- Install python packages
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## Run
-1. edit dataset path in `params/*.yaml`;
-2. run `python main.py --config params/*.yaml` in terminal.
-    
-For example, to evaluate the SuperPoint with SuperGlue, run:
-
-```bash
-python main.py --config params/kitti_superpoint_supergluematch.yaml
+```
+.
+├── task1.ipynb          # Robustness evaluation notebook
+├── task2.ipynb          # Camera calibration and PuzzleBot VO notebook
+├── Python-VO/utils/               # Utility functions and classes
+│   ├── PinholeCamera.py # Camera model implementation
+│   └── tools.py         # Helper functions
+├── Python-VO/Detectors/           # Feature detection implementations
+│   └── superpoint/      # SuperPoint detector
+├── Python-VO/Matchers/            # Feature matching implementations
+│   └── superglue/       # SuperGlue matcher
+├── calibration_images/  # Images for camera calibration
+│   └── calibration_result.yaml # Calibration parameters
+├── results/             # Output directory for results
+└── README.md            # This file
 ```
 
-## Evaluations
-**Absolute and relative translation errors on KITTI sequence 00**
-![eval](results/eval.png)
+## Part 1: Robustness Evaluation of Visual Odometry
 
-**Average relative translation errors on KITTI sequence 00**
+### Implemented in: `task1.ipynb`
 
-| orb_brutematch |     sift_flannmatch | superpoint_flannmatch | superpoint_supergluematch |
-| :------------: | :-------------------: | :-------------------: | :-----------------------: |
-|     0.748m     |        0.085m         |        0.177m         |          0.103m           |
+This notebook evaluates how visual odometry performance degrades under different types and levels of image noise.
 
-**Trajectory of ORB feature with brute matcher on KITTI sequence 00**
+#### Visual Odometry Implementation
+- images in KITTI loading and preprocessing
+- Feature detection with SuperPoint
+- Feature matching with SuperGlue
+- Motion estimation using Essential matrix
 
-![kitti_orb_brutematch](results/kitti_orb_brutematch.png)
-- red: ground truth
-- green: estimated trajectory
+### Implemented Noise Types
+- **Gaussian Noise** - Simulates electronic noise in imaging sensors
+- **Salt & Pepper Noise** - Simulates dead pixels or transmission errors
+- **Speckle Noise** - Simulates multiplicative noise common in radar imaging
 
-**Trajectory of SIFT feature with FLANN matcher on KITTI sequence 00**
 
-![kitti_sift_flannmatch](results/kitti_sift_flannmatch.png)
-- red: ground truth
-- green: estimated trajectory
+### Key Functions
+- `add_gaussian_noise()` - Adds Gaussian noise to images
+- `add_salt_pepper_noise()` - Adds salt and pepper noise to images
+- `add_speckle_noise()` - Adds speckle (multiplicative) noise to images
+- `evaluate_vo_with_noise()` - Evaluates VO performance with different noise parameters
+- `plot_results()` - Visualizes trajectory comparison and error metrics
+- `plot_all_noise_comparisons()` - Creates comprehensive visualizations
+- `generate_rmse_matrix()` - Produces tabulated results
+- `run_all_evaluations()` - Orchestrates the complete evaluation process
 
-**Trajectory of SuperPoint feature with FLANN matcher on KITTI sequence 00**
+### Evaluation Metrics
+- **Absolute RMSE** - Overall trajectory error compared to ground truth
+- **Relative RMSE** - Frame-to-frame motion error
+- **Processing Time** - Computational efficiency under different noise conditions
 
-![kitti_superpoint_flannmatch](results/kitti_superpoint_flannmatch.png)
-- red: ground truth
-- green: estimated trajectory
+## Part 2: Visual Odometry on PuzzleBot
 
-**Trajectory of SuperPoint feature with SuperGlue matcher on KITTI sequence 00**
+### Implemented in: `task2.ipynb`
 
-![kitti_superpoint_supergluematch](results/kitti_superpoint_supergluematch.png)
-- red: ground truth
-- green: estimated trajectory
+This notebook implements visual odometry on videos captured using the PuzzleBot robot with Jetson Nano.
+
+### Main Components
+
+#### Camera Calibration
+- Chessboard pattern detection
+- Camera intrinsic parameter estimation
+- Distortion coefficient calculation
+- Undistortion visualization
+
+#### Visual Odometry Implementation
+- Video loading and preprocessing
+- Feature detection with SuperPoint
+- Feature matching with SuperGlue
+- Motion estimation using Essential matrix
+- Trajectory tracking and visualization
+
+### Key Functions
+- `read_calibration_yaml()` - Loads camera calibration parameters
+- `run_vo_on_video()` - Main function for running VO on video files
+- `TrajPlotter` - Class for visualizing and saving trajectory data
+
+## Usage Instructions
+### Running the Notebooks
+first install the required packages:in requirments.txt
+then install the required model weights about the superpoint and superglue
+in: https://github.com/sherrywsy3446/Python-VO.git 
+place the whole python-vo folder in the same directory as the notebooks
+1. **For Task 1 (Robustness Evaluation)**:
+   - Open `task1.ipynb` in Jupyter Notebook
+   - Run all cells to perform the complete evaluation
+   - Adjust the `num_frames` parameter in the final cell to control evaluation length
+   - Results will be saved in the `results` directory
+
+2. **For Task 2 (PuzzleBot VO)**:
+   - Place calibration images in the `calibration_images` directory
+   - Open `task2.ipynb` in Jupyter Notebook
+   - Run the calibration section first to generate calibration parameters
+   - Update the video path to point to your captured video
+   - Run the VO implementation section
+   - Visualizations and trajectory data will be saved in the `results` directory
+
+## Key Features
+- Deep learning-based feature detection and matching
+- Robust camera calibration for accurate pose estimation
+- Comprehensive noise simulation and evaluation
+- Real-world testing on mobile robot platform
+- Extensive visualization and analysis
